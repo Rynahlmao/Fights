@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TikTok Clone</title>
+  <title>TikTok Clone with Sound</title>
   <style>
     body, html {
       margin: 0;
       padding: 0;
       overflow: hidden;
       font-family: sans-serif;
+      background: black;
     }
 
     .container {
@@ -17,6 +18,7 @@
       width: 100vw;
       overflow-y: scroll;
       scroll-snap-type: y mandatory;
+      display: none;
     }
 
     .video-slide {
@@ -43,37 +45,68 @@
       border-radius: 10px;
       max-width: 80%;
     }
+
+    #startOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      z-index: 999;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+
+  <div id="startOverlay">Tap to Start</div>
+
   <div class="container" id="videoContainer">
     <div class="video-slide">
-      <video src="https://files.catbox.moe/pf1x7c.mp4" muted autoplay loop playsinline></video>
+      <video src="https://files.catbox.moe/pf1x7c.mp4" playsinline></video>
       <div class="title">This is the first video</div>
     </div>
     <div class="video-slide">
-      <video src="https://files.catbox.moe/pf1x7c.mp4" muted autoplay loop playsinline></video>
+      <video src="https://files.catbox.moe/pf1x7c.mp4" playsinline></video>
       <div class="title">Funny cat doing backflips</div>
     </div>
     <div class="video-slide">
-      <video src="https://files.catbox.moe/pf1x7c.mp4" muted autoplay loop playsinline></video>
+      <video src="video3.mp4" playsinline></video>
       <div class="title">Travel vlog: Exploring Japan</div>
     </div>
   </div>
 
   <script>
-    const videos = document.querySelectorAll('video');
+    const overlay = document.getElementById('startOverlay');
     const container = document.getElementById('videoContainer');
+    const videos = document.querySelectorAll('video');
 
-    container.addEventListener('scroll', () => {
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      container.style.display = 'block';
+
       videos.forEach(video => {
-        const rect = video.getBoundingClientRect();
-        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-          video.play();
-        } else {
-          video.pause();
-        }
+        video.muted = false;
+        video.pause();
       });
+
+      // Setup intersection observer
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.75 });
+
+      videos.forEach(video => observer.observe(video));
     });
   </script>
 </body>
