@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TikTok Clone</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    .container {
+      height: 100vh;
+      width: 100vw;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+
+    .video-slide {
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      scroll-snap-align: start;
+    }
+
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    .title {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+      font-size: 18px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="videoContainer">
+    <div class="video-slide">
+      <video src="video1.mp4" muted autoplay loop playsinline></video>
+      <div class="title">This is the first video</div>
+    </div>
+    <div class="video-slide">
+      <video src="video2.mp4" muted autoplay loop playsinline></video>
+      <div class="title">Funny cat doing backflips</div>
+    </div>
+    <div class="video-slide">
+      <video src="video3.mp4" muted autoplay loop playsinline></video>
+      <div class="title">Travel vlog: Exploring Japan</div>
+    </div>
+  </div>
+
+  <script>
+    const videos = document.querySelectorAll('video');
+    const container = document.getElementById('videoContainer');
+
+    container.addEventListener('scroll', () => {
+      videos.forEach(video => {
+        const rect = video.getBoundingClientRect();
+        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
