@@ -35,7 +35,7 @@
 
     .title {
       position: absolute;
-      bottom: 20px;
+      bottom: 60px;
       left: 20px;
       color: white;
       font-size: 18px;
@@ -57,6 +57,22 @@
       display: none;
       z-index: 1;
     }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+    }
+
+    .progress-filled {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+    }
   </style>
 </head>
 <body>
@@ -65,8 +81,8 @@
   <script>
     const videoData = [
       { src: 'https://files.catbox.moe/pf1x7c.mp4', title: 'First video title' },
-      { src: 'video2.mp4', title: 'Funny cat moment' },
-      { src: 'video3.mp4', title: 'Cool travel clip' },
+      { src: 'https://files.catbox.moe/pf1x7c.mp4', title: 'Funny cat moment' },
+      { src: 'https://files.catbox.moe/pf1x7c.mp4', title: 'Cool travel clip' },
     ];
 
     const container = document.getElementById('videoContainer');
@@ -81,6 +97,7 @@
       vid.loop = true;
       vid.playsInline = true;
       vid.controls = false;
+      vid.muted = true;
 
       const title = document.createElement('div');
       title.className = 'title';
@@ -89,19 +106,47 @@
       const unmute = document.createElement('div');
       unmute.className = 'tap-to-unmute';
       unmute.innerText = 'Tap to unmute';
-
       unmute.style.display = 'block';
 
-      vid.muted = true;
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
 
+      const progressFill = document.createElement('div');
+      progressFill.className = 'progress-filled';
+      progressBar.appendChild(progressFill);
+
+      // Pause/Play toggle on video click
       vid.addEventListener('click', () => {
-        vid.muted = !vid.muted;
-        unmute.style.display = vid.muted ? 'block' : 'none';
+        if (vid.muted) {
+          vid.muted = false;
+          unmute.style.display = 'none';
+        } else {
+          if (vid.paused) {
+            vid.play();
+          } else {
+            vid.pause();
+          }
+        }
+      });
+
+      // Update progress bar
+      vid.addEventListener('timeupdate', () => {
+        const percent = (vid.currentTime / vid.duration) * 100;
+        progressFill.style.width = `${percent}%`;
+      });
+
+      // Seek on progress bar click
+      progressBar.addEventListener('click', (e) => {
+        const rect = progressBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = x / rect.width;
+        vid.currentTime = percent * vid.duration;
       });
 
       slide.appendChild(vid);
       slide.appendChild(title);
       slide.appendChild(unmute);
+      slide.appendChild(progressBar);
       container.appendChild(slide);
     }
 
