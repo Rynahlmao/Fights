@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TikTok Clone with Sound</title>
+  <title>TikTok Clone</title>
   <style>
     body, html {
       margin: 0;
@@ -18,7 +18,6 @@
       width: 100vw;
       overflow-y: scroll;
       scroll-snap-type: y mandatory;
-      display: none;
     }
 
     .video-slide {
@@ -46,67 +45,93 @@
       max-width: 80%;
     }
 
-    #startOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
+    .tap-to-unmute {
+      position: absolute;
+      top: 20px;
+      right: 20px;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      z-index: 999;
-      cursor: pointer;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-
-  <div id="startOverlay">Tap to Start</div>
-
-  <div class="container" id="videoContainer">
-    <div class="video-slide">
-      <video src="https://files.catbox.moe/pf1x7c.mp4" playsinline></video>
-      <div class="title">This is the first video</div>
-    </div>
-    <div class="video-slide">
-      <video src="https://files.catbox.moe/pf1x7c.mp4" playsinline></video>
-      <div class="title">Funny cat doing backflips</div>
-    </div>
-    <div class="video-slide">
-      <video src="video3.mp4" playsinline></video>
-      <div class="title">Travel vlog: Exploring Japan</div>
-    </div>
-  </div>
+  <div class="container" id="videoContainer"></div>
 
   <script>
-    const overlay = document.getElementById('startOverlay');
+    const videoData = [
+      { src: 'https://files.catbox.moe/pf1x7c.mp4', title: 'First video title' },
+      { src: 'video2.mp4', title: 'Funny cat moment' },
+      { src: 'video3.mp4', title: 'Cool travel clip' },
+    ];
+
     const container = document.getElementById('videoContainer');
-    const videos = document.querySelectorAll('video');
 
-    overlay.addEventListener('click', () => {
-      overlay.style.display = 'none';
-      container.style.display = 'block';
+    function createVideoSlide(video) {
+      const slide = document.createElement('div');
+      slide.className = 'video-slide';
 
-      videos.forEach(video => {
-        video.muted = false;
-        video.pause();
+      const vid = document.createElement('video');
+      vid.src = video.src;
+      vid.autoplay = true;
+      vid.loop = true;
+      vid.playsInline = true;
+      vid.controls = false;
+
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.innerText = video.title;
+
+      const unmute = document.createElement('div');
+      unmute.className = 'tap-to-unmute';
+      unmute.innerText = 'Tap to unmute';
+
+      unmute.style.display = 'block';
+
+      vid.muted = true;
+
+      vid.addEventListener('click', () => {
+        vid.muted = !vid.muted;
+        unmute.style.display = vid.muted ? 'block' : 'none';
       });
 
-      // Setup intersection observer
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          const video = entry.target;
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      }, { threshold: 0.75 });
+      slide.appendChild(vid);
+      slide.appendChild(title);
+      slide.appendChild(unmute);
+      container.appendChild(slide);
+    }
 
-      videos.forEach(video => observer.observe(video));
+    let videoIndex = 0;
+    function loadMoreVideos(count = 3) {
+      for (let i = 0; i < count; i++) {
+        if (videoIndex >= videoData.length) return;
+        createVideoSlide(videoData[videoIndex]);
+        videoIndex++;
+      }
+    }
+
+    loadMoreVideos();
+
+    container.addEventListener('scroll', () => {
+      const scrollBottom = container.scrollTop + container.clientHeight;
+      const fullHeight = container.scrollHeight;
+
+      if (scrollBottom >= fullHeight - 200) {
+        loadMoreVideos();
+      }
+
+      document.querySelectorAll('video').forEach(video => {
+        const rect = video.getBoundingClientRect();
+        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
     });
   </script>
 </body>
